@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+  <meta charset="UTF-8">
+  <!-- PWA: łączymy manifest i rejestrujemy service worker -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4a90e2">
+  <title>Flashcards App</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    /* PRZYCISKI WYBORU */
+    .choice-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      margin: 8px 0;
+      font-size: 15px;
+      border: 2px solid #4a90e2;
+      border-radius: 8px;
+      background: white;
+      color: #4a90e2;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .choice-btn:hover {
+      background: #4a90e2;
+      color: white;
+    }
+
+    .choice-btn .btn-title {
+      font-weight: bold;
+    }
+
+    .choice-btn .btn-sub {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 2px;
+    }
+
+    /* PRZYCISK STATYSTYK */
+    .stats-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      font-size: 15px;
+      border: 2px solid #eee;
+      border-radius: 8px;
+      background: white;
+      color: #888;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .stats-btn:hover {
+      border-color: #888;
+      color: #333;
+    }
+
+    /* PRZYCISK SOS */
+    .sos-btn {
+      display: none;
+      /* pokazuje się tylko gdy są błędy */
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      font-size: 15px;
+      font-weight: bold;
+      border: 2px solid #e74c3c;
+      border-radius: 8px;
+      background: white;
+      color: #e74c3c;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sos-btn:hover {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: #888;
+      font-size: 13px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      padding: 0;
+    }
+
+    .back-btn:hover {
+      color: #333;
+    }
+
+    /* EKRAN PYTANIA */
+    .word-display {
+      font-size: 36px;
+      font-weight: bold;
+      color: #222;
+      margin: 20px 0;
+    }
+
+    .answer-input {
+      width: 100%;
+      padding: 12px;
+      font-size: 18px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      margin: 15px 0;
+      text-align: center;
+    }
+
+    .answer-input:focus {
+      outline: none;
+      border-color: #4a90e2;
+    }
+
+    .check-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .check-btn:hover {
+      background: #357abd;
+    }
+
+    /* EKRAN WERYFIKACJI */
+    .result-box {
+      background: #f8f8f8;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .result-box .label {
+      color: #888;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .result-box .value {
+      font-weight: bold;
+      color: #222;
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    /* ZDANIE PRZYKŁADOWE */
+    .example-box {
+      background: #f0f7ff;
+      border-left: 3px solid #4a90e2;
+      border-radius: 0 8px 8px 0;
+      padding: 14px;
+      margin: 16px 0;
+      text-align: left;
+    }
+
+    .example-box .example-label {
+      font-size: 11px;
+      color: #4a90e2;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .example-box .example-eng {
+      font-size: 15px;
+      color: #333;
+      margin-bottom: 4px;
+      font-style: italic;
+    }
+
+    .example-box .example-pl {
+      font-size: 13px;
+      color: #888;
+    }
+
+    /* PRZYCISKI SRS */
+    .srs-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .srs-btn {
+      padding: 12px 8px;
+      font-size: 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: opacity 0.2s;
+    }
+
+    .srs-btn:hover {
+      opacity: 0.85;
+    }
+
+    .btn-again {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .btn-hard {
+      background: #e67e22;
+      color: white;
+    }
+
+    .btn-good {
+      background: #2ecc71;
+      color: white;
+    }
+
+    .btn-easy {
+      background: #3498db;
+      color: white;
+    }
+
+    /* BRAK SŁÓWEK */
+    .empty-box {
+      background: #f0f9ff;
+      border-radius: 8px;
+      padding: 30px 20px;
+      margin: 20px 0;
+      color: #555;
+    }
+
+    .empty-box .emoji {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+
+    .empty-box p {
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* BADGE */
+    .badge {
+      display: inline-block;
+      background: #e8f0fe;
+      color: #4a90e2;
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 12px;
+      margin: 0 3px;
+    }
+
+    .badge-sos {
+      background: #fde8e8;
+      color: #e74c3c;
+    }
+
+    /* STATYSTYKI */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .stat-card {
+      background: #f8f8f8;
+      border-radius: 10px;
+      padding: 16px 12px;
+      text-align: center;
+    }
+
+    .stat-card .stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .stat-card .stat-label {
+      font-size: 12px;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    .stat-card.highlight .stat-value {
+      color: #e67e22;
+    }
+
+    .streak-card {
+      background: linear-gradient(135deg, #f39c12, #e74c3c);
+      border-radius: 10px;
+      padding: 20px;
+      color: white;
+      margin-bottom: 16px;
+    }
+
+    .streak-card .streak-value {
+      font-size: 48px;
+      font-weight: bold;
+    }
+
+    .streak-card .streak-label {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    .level-progress {
+      margin: 8px 0;
+      text-align: left;
+    }
+
+    .level-progress .level-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 4px;
+    }
+
+    .progress-bar-bg {
+      background: #eee;
+      border-radius: 10px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      background: #4a90e2;
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.5s ease;
+    }
+
+    .loading {
+      color: #888;
+      font-size: 14px;
+      margin: 20px 0;
+    }
+
+    /* TRYB SOS — baner informacyjny */
+    .sos-banner {
+      background: #fde8e8;
+      border: 1px solid #e74c3c;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #c0392b;
+      text-align: left;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- EKRAN 1: Wybór poziomu -->
+    <div id="screen-level" class="screen active">
+      <h1>Flashcards App</h1>
+      <p class="subtitle">Wybierz poziom:</p>
+      <button class="choice-btn" onclick="selectLevel('A1')">
+        <div class="btn-title">A1 — Początkujący</div>
+        <div class="btn-sub">Podstawowe słownictwo codzienne</div>
+      </button>
+      <button class="choice-btn" onclick="selectLevel('A2')">
+        <div class="btn-title">A2 — Podstawowy</div>
+        <div class="btn-sub">Proste rozmowy i sytuacje</div>
+      </button>
+      <button class="choice-btn" onclick="selectLevel('B1')">
+        <div class="btn-title">B1 — Średniozaawansowany</div>
+        <div class="btn-sub">Swobodna komunikacja</div>
+      </button>
+      <button class="choice-btn" onclick="selectLevel('B2')">
+        <div class="btn-title">B2 — Wyższy średni</div>
+        <div class="btn-sub">Złożone tematy i dyskusje</div>
+      </button>
+      <!-- Przycisk SOS — widoczny tylko gdy są dzisiejsze błędy -->
+      <button class="sos-btn" id="sos-main-btn" onclick="startSOS()">
+        🆘 Powtórz dzisiejsze błędy (<span id="sos-count">0</span>)
+      </button>
+      <button class="stats-btn" onclick="showStats()">📊 Moje statystyki</button>
+    </div>
+
+    <!-- EKRAN 2: Wybór kategorii -->
+    <div id="screen-category" class="screen">
+      <button class="back-btn" onclick="showScreen('screen-level')">← Wróć</button>
+      <h1>Kategoria</h1>
+      <p class="subtitle">Poziom: <span class="badge" id="selected-level-badge"></span></p>
+      <div id="category-list"></div>
+    </div>
+
+    <!-- EKRAN 3: Wybór kierunku -->
+    <div id="screen-direction" class="screen">
+      <button class="back-btn" onclick="showScreen('screen-category')">← Wróć</button>
+      <h1>Kierunek</h1>
+      <p class="subtitle">
+        <span class="badge" id="dir-level-badge"></span>
+        <span class="badge" id="dir-category-badge"></span>
+      </p>
+      <button class="choice-btn" onclick="startSession('en-pl')">
+        <div class="btn-title">🇬🇧 Angielski → Polski</div>
+        <div class="btn-sub">Widzisz angielskie słowo, wpisujesz po polsku</div>
+      </button>
+      <button class="choice-btn" onclick="startSession('pl-en')">
+        <div class="btn-title">🇵🇱 Polski → Angielski</div>
+        <div class="btn-sub">Widzisz polskie słowo, wpisujesz po angielsku</div>
+      </button>
+    </div>
+
+    <!-- EKRAN 4: Pytanie -->
+    <div id="screen-question" class="screen">
+      <button class="back-btn" onclick="showScreen('screen-direction')">← Wróć</button>
+      <!-- Baner SOS pojawia się gdy jesteśmy w trybie SOS -->
+      <div class="sos-banner" id="sos-banner" style="display:none;">
+        🆘 Tryb S.O.S. — powtarzasz dzisiejsze błędy
+      </div>
+      <p style="color:#888; font-size:13px;" id="direction-label"></p>
+      <div class="word-display" id="question-word"></div>
+      <input type="text" class="answer-input" id="answer-input" placeholder="Wpisz tłumaczenie..." />
+      <button class="check-btn" onclick="checkAnswer()">Sprawdź ✓</button>
+      <div class="empty-box" id="empty-box" style="display:none;">
+        <div class="emoji">🎉</div>
+        <p id="empty-msg-text">Brak słówek do powtórki!</p>
+        <p style="margin-top:8px; font-size:13px; color:#888;">Wróć później lub wybierz inną kategorię.</p>
+      </div>
+    </div>
+
+    <!-- EKRAN 5: Weryfikacja -->
+    <div id="screen-result" class="screen">
+      <p style="color:#888; font-size:13px; margin-bottom:4px;">Porównaj swoją odpowiedź:</p>
+
+      <div class="result-box">
+        <p class="label">Twoja odpowiedź:</p>
+        <p class="value" id="user-answer-display"></p>
+        <p class="label">Poprawna odpowiedź:</p>
+        <p class="value" id="correct-answer-display"></p>
+      </div>
+
+      <!-- Zdanie przykładowe — pokazuje się tylko gdy istnieje -->
+      <div class="example-box" id="example-box" style="display:none;">
+        <div class="example-label">📖 Przykład użycia</div>
+        <div class="example-eng" id="example-eng"></div>
+        <div class="example-pl" id="example-pl"></div>
+      </div>
+
+      <div class="srs-buttons">
+        <button class="srs-btn btn-again" onclick="submitReview(10 / 1440)">
+          😰 Nie wiem<br><small>za 10 minut</small>
+        </button>
+        <button class="srs-btn btn-hard" onclick="submitReview(1)">
+          😓 Trudne<br><small>za 1 dzień</small>
+        </button>
+        <button class="srs-btn btn-good" onclick="submitReview(3)">
+          🙂 Dobre<br><small>za 3 dni</small>
+        </button>
+        <button class="srs-btn btn-easy" onclick="submitReview(7)">
+          😄 Łatwe<br><small>za 7 dni</small>
+        </button>
+      </div>
+    </div>
+
+    <!-- EKRAN 6: Statystyki -->
+    <div id="screen-stats" class="screen">
+      <button class="back-btn" onclick="showScreen('screen-level')">← Wróć</button>
+      <h1>Moje statystyki</h1>
+      <p class="loading" id="stats-loading">Ładowanie...</p>
+      <div id="stats-content" style="display:none;">
+        <div class="streak-card">
+          <div class="streak-value">🔥 <span id="stat-streak">0</span></div>
+          <div class="streak-label">dni nauki z rzędu</div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-total">0</div>
+            <div class="stat-label">Wszystkich słówek</div>
+          </div>
+          <div class="stat-card highlight">
+            <div class="stat-value" id="stat-due">0</div>
+            <div class="stat-label">Do powtórki dziś</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-learned">0</div>
+            <div class="stat-label">Już poznanych</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-today">0</div>
+            <div class="stat-label">Dziś powtórzonych</div>
+          </div>
+        </div>
+        <p style="text-align:left; font-size:13px; color:#888; margin-bottom:8px;">Postęp per poziom:</p>
+        <div id="level-progress-list"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ⚙️ KONFIGURACJA
+    const SUPABASE_URL = "https://jvliruzudhgdwuwxamjk.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2bGlydXp1ZGhnZHd1d3hhbWprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MDU2MzMsImV4cCI6MjA5NTk4MTYzM30.h7eqvUFdxBz562vQD_sO_ZRuYGWDDGFA1I5yfax6qZw";
+
+    const CATEGORY_LABELS = {
+      food: { pl: "🍎 Jedzenie", sub: "Posiłki, produkty, napoje" },
+      travel: { pl: "✈️ Podróże", sub: "Transport, miejsca, dokumenty" },
+      home: { pl: "🏠 Dom", sub: "Meble, pomieszczenia, przedmioty" },
+      animals: { pl: "🐾 Zwierzęta", sub: "Dzikie i domowe" },
+      school: { pl: "📚 Szkoła", sub: "Nauka, przybory, ludzie" },
+      work: { pl: "💼 Praca", sub: "Biuro, kariera, obowiązki" },
+      health: { pl: "❤️ Zdrowie", sub: "Medycyna, leczenie, ciało" },
+      technology: { pl: "💻 Technologia", sub: "Komputery, internet, urządzenia" },
+      environment: { pl: "🌍 Środowisko", sub: "Natura, klimat, ekologia" },
+      personality: { pl: "😊 Osobowość", sub: "Cechy charakteru, emocje" },
+    };
+
+    // 🧠 Stan aplikacji
+    let state = {
+      level: null,
+      category: null,
+      direction: null,
+      currentWord: null,
+      userAnswer: "",
+      reviewedToday: 0,
+      isSOS: false,        // czy jesteśmy w trybie SOS
+      sosQueue: []         // kolejka słówek SOS (tylko id)
+    };
+
+    // =============================
+    // Helper: zapytanie do Supabase
+    // =============================
+    async function supabase(path, options = {}) {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+        ...options,
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        }
+      });
+      const text = await response.text();
+      return text ? JSON.parse(text) : null;
+    }
+
+    // =============================
+    // Sprawdzamy ile błędów dziś
+    // i aktualizujemy przycisk SOS
+    // =============================
+    async function checkSOSCount() {
+      const today = new Date().toISOString().split("T")[0];
+      // Pobieramy słówka z sos_date = dziś
+      const words = await supabase(`words?select=id&sos_date=eq.${today}`);
+      const count = words ? words.length : 0;
+
+      const btn = document.getElementById("sos-main-btn");
+      const countEl = document.getElementById("sos-count");
+
+      if (count > 0) {
+        // Pokazujemy przycisk SOS z liczbą błędów
+        countEl.textContent = count;
+        btn.style.display = "block";
+      } else {
+        btn.style.display = "none";
+      }
+    }
+
+    // =============================
+    // START TRYBU SOS
+    // =============================
+    async function startSOS() {
+      const today = new Date().toISOString().split("T")[0];
+      const words = await supabase(
+        `words?select=id,english,polish,example_eng,example_pl&sos_date=eq.${today}`
+      );
+
+      if (!words || words.length === 0) return;
+
+      // Zapisujemy kolejkę SOS w stanie
+      state.isSOS = true;
+      state.sosQueue = [...words]; // kopia tablicy
+      state.direction = "en-pl";  // domyślny kierunek w SOS
+
+      document.getElementById("direction-label").textContent = "🆘 Tryb S.O.S.";
+      document.getElementById("sos-banner").style.display = "block";
+
+      loadSOSWord();
+      showScreen("screen-question");
+    }
+
+    // =============================
+    // Ładujemy słowo z kolejki SOS
+    // =============================
+    function loadSOSWord() {
+      showScreen("screen-question");
+
+      if (state.sosQueue.length === 0) {
+        // Kolejka SOS wyczerpana
+        document.getElementById("empty-box").style.display = "block";
+        document.getElementById("empty-msg-text").textContent =
+          "Brawo! Powtórzyłeś wszystkie dzisiejsze błędy! 🎉";
+        document.getElementById("question-word").style.display = "none";
+        document.getElementById("answer-input").style.display = "none";
+        document.querySelector(".check-btn").style.display = "none";
+        return;
+      }
+
+      // Bierzemy pierwsze słowo z kolejki
+      state.currentWord = state.sosQueue[0];
+
+      const questionWord = state.direction === "en-pl"
+        ? state.currentWord.english
+        : state.currentWord.polish;
+
+      document.getElementById("question-word").textContent = questionWord;
+      document.getElementById("question-word").style.display = "block";
+      document.getElementById("answer-input").style.display = "block";
+      document.getElementById("answer-input").value = "";
+      document.querySelector(".check-btn").style.display = "block";
+      document.getElementById("empty-box").style.display = "none";
+      document.getElementById("answer-input").focus();
+    }
+
+    // =============================
+    // EKRAN 1 → 2: Wybór poziomu
+    // =============================
+    async function selectLevel(level) {
+      state.level = level;
+      state.isSOS = false;
+      document.getElementById("selected-level-badge").textContent = level;
+
+      const words = await supabase(`words?select=category&level=eq.${level}`);
+      const categories = [...new Set(words.map(w => w.category).filter(Boolean))];
+
+      const list = document.getElementById("category-list");
+      list.innerHTML = "";
+
+      const allBtn = document.createElement("button");
+      allBtn.className = "choice-btn";
+      allBtn.innerHTML = `
+      <div class="btn-title">📋 Wszystkie kategorie</div>
+      <div class="btn-sub">Ucz się wszystkich słówek z poziomu ${level}</div>
+    `;
+      allBtn.onclick = () => selectCategory("all");
+      list.appendChild(allBtn);
+
+      categories.forEach(cat => {
+        const label = CATEGORY_LABELS[cat] || { pl: cat, sub: "" };
+        const btn = document.createElement("button");
+        btn.className = "choice-btn";
+        btn.innerHTML = `
+        <div class="btn-title">${label.pl}</div>
+        <div class="btn-sub">${label.sub}</div>
+      `;
+        btn.onclick = () => selectCategory(cat);
+        list.appendChild(btn);
+      });
+
+      showScreen("screen-category");
+    }
+
+    // =============================
+    // EKRAN 2 → 3: Wybór kategorii
+    // =============================
+    function selectCategory(category) {
+      state.category = category;
+      document.getElementById("dir-level-badge").textContent = state.level;
+      const catLabel = category === "all"
+        ? "Wszystkie"
+        : (CATEGORY_LABELS[category]?.pl || category);
+      document.getElementById("dir-category-badge").textContent = catLabel;
+      showScreen("screen-direction");
+    }
+
+    // =============================
+    // EKRAN 3 → 4: Wybór kierunku
+    // =============================
+    async function startSession(direction) {
+      state.direction = direction;
+      state.reviewedToday = 0;
+      state.isSOS = false;
+      document.getElementById("sos-banner").style.display = "none";
+      const label = direction === "en-pl"
+        ? "🇬🇧 Angielski → Polski"
+        : "🇵🇱 Polski → Angielski";
+      document.getElementById("direction-label").textContent = label;
+      await loadNextWord();
+    }
+
+    // =============================
+    // Pobieramy słowo do powtórki
+    // =============================
+    async function loadNextWord() {
+      const now = new Date().toISOString();
+
+      let url = `words?select=id,english,polish,example_eng,example_pl`
+        + `&level=eq.${state.level}`
+        + `&next_review_at=lte.${now}`
+        + `&order=next_review_at.asc`
+        + `&limit=1`;
+
+      if (state.category !== "all") {
+        url += `&category=eq.${state.category}`;
+      }
+
+      const words = await supabase(url);
+      showScreen("screen-question");
+
+      if (!words || words.length === 0) {
+        document.getElementById("empty-box").style.display = "block";
+        document.getElementById("empty-msg-text").textContent =
+          "Brak słówek do powtórki!";
+        document.getElementById("question-word").style.display = "none";
+        document.getElementById("answer-input").style.display = "none";
+        document.querySelector(".check-btn").style.display = "none";
+        return;
+      }
+
+      document.getElementById("empty-box").style.display = "none";
+      document.getElementById("question-word").style.display = "block";
+      document.getElementById("answer-input").style.display = "block";
+      document.querySelector(".check-btn").style.display = "block";
+
+      state.currentWord = words[0];
+      const questionWord = state.direction === "en-pl"
+        ? state.currentWord.english
+        : state.currentWord.polish;
+
+      document.getElementById("question-word").textContent = questionWord;
+      document.getElementById("answer-input").value = "";
+      document.getElementById("answer-input").focus();
+    }
+
+    // =============================
+    // EKRAN 4 → 5: Sprawdzamy odpowiedź
+    // =============================
+    function checkAnswer() {
+      state.userAnswer = document.getElementById("answer-input").value.trim();
+
+      const correctAnswer = state.direction === "en-pl"
+        ? state.currentWord.polish
+        : state.currentWord.english;
+
+      document.getElementById("user-answer-display").textContent =
+        state.userAnswer || "(brak odpowiedzi)";
+      document.getElementById("correct-answer-display").textContent = correctAnswer;
+
+      // Pokazujemy zdanie przykładowe jeśli istnieje
+      const exampleBox = document.getElementById("example-box");
+      if (state.currentWord.example_eng && state.currentWord.example_pl) {
+        document.getElementById("example-eng").textContent =
+          state.currentWord.example_eng;
+        document.getElementById("example-pl").textContent =
+          state.currentWord.example_pl;
+        exampleBox.style.display = "block";
+      } else {
+        exampleBox.style.display = "none";
+      }
+
+      showScreen("screen-result");
+    }
+
+    // =============================
+    // EKRAN 5 → 4: Zapisujemy ocenę SRS
+    // =============================
+    async function submitReview(intervalDays) {
+      const today = new Date().toISOString().split("T")[0];
+      const nextReview = new Date();
+      nextReview.setTime(nextReview.getTime() + intervalDays * 24 * 60 * 60 * 1000);
+
+      // Budujemy obiekt aktualizacji
+      const updateData = {
+        next_review_at: nextReview.toISOString(),
+        interval_days: Math.round(intervalDays)
+      };
+
+      // Jeśli kliknięto "Nie wiem" (intervalDays = 10/1440 czyli ~0.007)
+      // zapisujemy dzisiejszą datę w sos_date
+      if (intervalDays < 0.1) {
+        updateData.sos_date = today;
+      }
+
+      // Aktualizujemy słowo w bazie
+      await supabase(`words?id=eq.${state.currentWord.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(updateData)
+      });
+
+      // Zapisujemy sesję nauki
+      state.reviewedToday++;
+      await supabase(`study_sessions`, {
+        method: "POST",
+        headers: { "Prefer": "resolution=merge-duplicates" },
+        body: JSON.stringify({
+          studied_at: today,
+          words_reviewed: state.reviewedToday
+        })
+      });
+
+      // Aktualizujemy licznik SOS na ekranie głównym (w tle)
+      checkSOSCount();
+
+      // Przechodzimy do następnego słowa
+      if (state.isSOS) {
+        // W trybie SOS — usuwamy słowo z kolejki i ładujemy następne
+        state.sosQueue.shift();
+        loadSOSWord();
+      } else {
+        await loadNextWord();
+      }
+    }
+
+    // =============================
+    // EKRAN STATYSTYK
+    // =============================
+    async function showStats() {
+      showScreen("screen-stats");
+      document.getElementById("stats-loading").style.display = "block";
+      document.getElementById("stats-content").style.display = "none";
+
+      const now = new Date().toISOString();
+      const today = new Date().toISOString().split("T")[0];
+
+      const [allWords, sessions] = await Promise.all([
+        supabase(`words?select=id,level,interval_days,next_review_at`),
+        supabase(`study_sessions?select=studied_at,words_reviewed&order=studied_at.desc&limit=365`)
+      ]);
+
+      // Streak
+      let streak = 0;
+      if (sessions && sessions.length > 0) {
+        const lastDate = new Date(sessions[0].studied_at);
+        const todayDate = new Date(today);
+        const diffDays = Math.floor((todayDate - lastDate) / (1000 * 60 * 60 * 24));
+        if (diffDays <= 1) {
+          streak = 1;
+          for (let i = 1; i < sessions.length; i++) {
+            const curr = new Date(sessions[i].studied_at);
+            const prev = new Date(sessions[i - 1].studied_at);
+            const diff = Math.floor((prev - curr) / (1000 * 60 * 60 * 24));
+            if (diff === 1) { streak++; } else { break; }
+          }
+        }
+      }
+
+      const total = allWords ? allWords.length : 0;
+      const learned = allWords ? allWords.filter(w => w.interval_days > 0).length : 0;
+      const due = allWords ? allWords.filter(w => new Date(w.next_review_at) <= new Date(now)).length : 0;
+      const todaySession = sessions ? sessions.find(s => s.studied_at === today) : null;
+      const todayCount = todaySession ? todaySession.words_reviewed : 0;
+
+      document.getElementById("stat-streak").textContent = streak;
+      document.getElementById("stat-total").textContent = total;
+      document.getElementById("stat-due").textContent = due;
+      document.getElementById("stat-learned").textContent = learned;
+      document.getElementById("stat-today").textContent = todayCount;
+
+      const levels = ["A1", "A2", "B1", "B2"];
+      const levelList = document.getElementById("level-progress-list");
+      levelList.innerHTML = "";
+      levels.forEach(lvl => {
+        const lvlWords = allWords ? allWords.filter(w => w.level === lvl) : [];
+        if (lvlWords.length === 0) return;
+        const lvlLearned = lvlWords.filter(w => w.interval_days > 0).length;
+        const pct = Math.round((lvlLearned / lvlWords.length) * 100);
+        levelList.innerHTML += `
+        <div class="level-progress">
+          <div class="level-header">
+            <span><strong>${lvl}</strong> — ${lvlLearned} / ${lvlWords.length} słówek</span>
+            <span>${pct}%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: ${pct}%"></div>
+          </div>
+        </div>
+      `;
+      });
+
+      document.getElementById("stats-loading").style.display = "none";
+      document.getElementById("stats-content").style.display = "block";
+    }
+
+    // =============================
+    // Helper: przełączamy ekrany
+    // =============================
+    function showScreen(screenId) {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      document.getElementById(screenId).classList.add("active");
+    }
+
+    // Enter = Sprawdź
+    document.getElementById("answer-input").addEventListener("keydown", e => {
+      if (e.key === "Enter") checkAnswer();
+    });
+
+    // Sprawdzamy SOS przy starcie aplikacji
+    checkSOSCount();
+  </script>
+  <script>
+    // Rejestrujemy service worker — działa tylko na HTTPS
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js")
+        .then(() => console.log("Service Worker zarejestrowany"))
+        .catch(err => console.log("Błąd SW:", err));
+    }
+  </script>
+</body>
+
+</html>
