@@ -3,6 +3,12 @@
 
 <head>
   <meta charset="UTF-8">
+  <!-- Blokujemy zoom i wymuszamy szerokość urządzenia -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- iOS — ukrywa pasek przeglądarki gdy dodana do ekranu głównego -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Flashcards">
   <!-- PWA: łączymy manifest i rejestrujemy service worker -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#4a90e2">
@@ -19,18 +25,42 @@
       background: #f0f4f8;
       display: flex;
       justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      align-items: flex-start;
+      /* Pełny ekran — blokujemy scroll na body */
+      min-height: 100dvh;
+      overflow: hidden;
+      /* Bezpieczne strefy dla iPhone z notchem */
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
 
     .container {
       background: white;
-      border-radius: 12px;
-      padding: 40px;
       width: 100%;
       max-width: 500px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      min-height: 100dvh;
+      padding: 24px 20px;
       text-align: center;
+      /* Na telefonie — bez zaokrągleń i cienia, pełny ekran */
+      box-shadow: none;
+      border-radius: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Na większych ekranach (tablet/desktop) przywracamy ładny wygląd */
+    @media (min-width: 520px) {
+      body {
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        min-height: auto;
+        max-height: 90vh;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+      }
     }
 
     h1 {
