@@ -3,13 +3,10 @@
 
 <head>
   <meta charset="UTF-8">
-  <!-- Blokujemy zoom i wymuszamy szerokość urządzenia -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <!-- iOS — ukrywa pasek przeglądarki gdy dodana do ekranu głównego -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Flashcards">
-  <!-- PWA: łączymy manifest i rejestrujemy service worker -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#4a90e2">
   <title>Flashcards App</title>
@@ -26,10 +23,8 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      /* Pełny ekran — blokujemy scroll na body */
       min-height: 100dvh;
       overflow: hidden;
-      /* Bezpieczne strefy dla iPhone z notchem */
       padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
 
@@ -40,14 +35,12 @@
       min-height: 100dvh;
       padding: 24px 20px;
       text-align: center;
-      /* Na telefonie — bez zaokrągleń i cienia, pełny ekran */
       box-shadow: none;
       border-radius: 0;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
 
-    /* Na większych ekranach (tablet/desktop) przywracamy ładny wygląd */
     @media (min-width: 520px) {
       body {
         align-items: center;
@@ -83,7 +76,6 @@
       display: block;
     }
 
-    /* PRZYCISKI WYBORU */
     .choice-btn {
       display: block;
       width: 100%;
@@ -114,7 +106,6 @@
       margin-top: 2px;
     }
 
-    /* PRZYCISK STATYSTYK */
     .stats-btn {
       display: block;
       width: 100%;
@@ -134,10 +125,8 @@
       color: #333;
     }
 
-    /* PRZYCISK SOS */
     .sos-btn {
       display: none;
-      /* pokazuje się tylko gdy są błędy */
       width: 100%;
       padding: 12px;
       margin-top: 8px;
@@ -156,6 +145,22 @@
       color: white;
     }
 
+    .logout-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-top: 20px;
+      font-size: 13px;
+      border: none;
+      background: none;
+      color: #aaa;
+      cursor: pointer;
+    }
+
+    .logout-btn:hover {
+      color: #e74c3c;
+    }
+
     .back-btn {
       background: none;
       border: none;
@@ -170,7 +175,66 @@
       color: #333;
     }
 
-    /* EKRAN PYTANIA */
+    .auth-input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      margin: 8px 0;
+    }
+
+    .auth-input:focus {
+      outline: none;
+      border-color: #4a90e2;
+    }
+
+    .auth-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      background: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .auth-btn:hover {
+      background: #357abd;
+    }
+
+    .auth-switch {
+      margin-top: 16px;
+      font-size: 14px;
+      color: #888;
+    }
+
+    .auth-switch a {
+      color: #4a90e2;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .auth-error {
+      background: #fde8e8;
+      color: #c0392b;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .auth-loading {
+      color: #888;
+      font-size: 14px;
+      margin-top: 10px;
+      display: none;
+    }
+
     .word-display {
       font-size: 36px;
       font-weight: bold;
@@ -208,7 +272,6 @@
       background: #357abd;
     }
 
-    /* EKRAN WERYFIKACJI */
     .result-box {
       background: #f8f8f8;
       border-radius: 8px;
@@ -230,7 +293,6 @@
       margin-bottom: 12px;
     }
 
-    /* ZDANIE PRZYKŁADOWE */
     .example-box {
       background: #f0f7ff;
       border-left: 3px solid #4a90e2;
@@ -260,7 +322,6 @@
       color: #888;
     }
 
-    /* PRZYCISKI SRS */
     .srs-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -302,7 +363,6 @@
       color: white;
     }
 
-    /* BRAK SŁÓWEK */
     .empty-box {
       background: #f0f9ff;
       border-radius: 8px;
@@ -321,7 +381,6 @@
       line-height: 1.5;
     }
 
-    /* BADGE */
     .badge {
       display: inline-block;
       background: #e8f0fe;
@@ -332,12 +391,6 @@
       margin: 0 3px;
     }
 
-    .badge-sos {
-      background: #fde8e8;
-      color: #e74c3c;
-    }
-
-    /* STATYSTYKI */
     .stats-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -420,16 +473,10 @@
       margin: 20px 0;
     }
 
-    /* TRYB SOS — baner informacyjny */
-    .sos-banner {
-      background: #fde8e8;
-      border: 1px solid #e74c3c;
-      border-radius: 8px;
-      padding: 10px 14px;
+    .user-email {
+      font-size: 12px;
+      color: #aaa;
       margin-bottom: 16px;
-      font-size: 13px;
-      color: #c0392b;
-      text-align: left;
     }
   </style>
 </head>
@@ -437,9 +484,44 @@
 <body>
   <div class="container">
 
-    <!-- EKRAN 1: Wybór poziomu -->
-    <div id="screen-level" class="screen active">
+    <!-- EKRAN 0: Logowanie -->
+    <div id="screen-login" class="screen active">
       <h1>Flashcards App</h1>
+      <p class="subtitle">Zaloguj się aby kontynuować naukę</p>
+
+      <input type="email" class="auth-input" id="login-email" placeholder="Adres e-mail" />
+      <input type="password" class="auth-input" id="login-password" placeholder="Hasło" />
+      <button class="auth-btn" onclick="handleLogin()">Zaloguj się</button>
+
+      <div class="auth-loading" id="login-loading">Logowanie...</div>
+      <div class="auth-error" id="login-error"></div>
+
+      <p class="auth-switch">
+        Nie masz konta? <a onclick="showScreen('screen-register')">Zarejestruj się</a>
+      </p>
+    </div>
+
+    <!-- EKRAN 0b: Rejestracja -->
+    <div id="screen-register" class="screen">
+      <h1>Flashcards App</h1>
+      <p class="subtitle">Stwórz nowe konto</p>
+
+      <input type="email" class="auth-input" id="register-email" placeholder="Adres e-mail" />
+      <input type="password" class="auth-input" id="register-password" placeholder="Hasło (min. 6 znaków)" />
+      <button class="auth-btn" onclick="handleRegister()">Zarejestruj się</button>
+
+      <div class="auth-loading" id="register-loading">Tworzenie konta...</div>
+      <div class="auth-error" id="register-error"></div>
+
+      <p class="auth-switch">
+        Masz już konto? <a onclick="showScreen('screen-login')">Zaloguj się</a>
+      </p>
+    </div>
+
+    <!-- EKRAN 1: Wybór poziomu -->
+    <div id="screen-level" class="screen">
+      <h1>Flashcards App</h1>
+      <p class="user-email" id="user-email-display"></p>
       <p class="subtitle">Wybierz poziom:</p>
       <button class="choice-btn" onclick="selectLevel('A1')">
         <div class="btn-title">A1 — Początkujący</div>
@@ -457,11 +539,11 @@
         <div class="btn-title">B2 — Wyższy średni</div>
         <div class="btn-sub">Złożone tematy i dyskusje</div>
       </button>
-      <!-- Przycisk SOS — widoczny tylko gdy są dzisiejsze błędy -->
       <button class="sos-btn" id="sos-main-btn" onclick="startSOS()">
         🆘 Powtórz dzisiejsze błędy (<span id="sos-count">0</span>)
       </button>
       <button class="stats-btn" onclick="showStats()">📊 Moje statystyki</button>
+      <button class="logout-btn" onclick="handleLogout()">Wyloguj się</button>
     </div>
 
     <!-- EKRAN 2: Wybór kategorii -->
@@ -493,8 +575,8 @@
     <!-- EKRAN 4: Pytanie -->
     <div id="screen-question" class="screen">
       <button class="back-btn" onclick="showScreen('screen-direction')">← Wróć</button>
-      <!-- Baner SOS pojawia się gdy jesteśmy w trybie SOS -->
-      <div class="sos-banner" id="sos-banner" style="display:none;">
+      <div class="sos-banner" id="sos-banner"
+        style="display:none; background:#fde8e8; border:1px solid #e74c3c; border-radius:8px; padding:10px 14px; margin-bottom:16px; font-size:13px; color:#c0392b; text-align:left;">
         🆘 Tryb S.O.S. — powtarzasz dzisiejsze błędy
       </div>
       <p style="color:#888; font-size:13px;" id="direction-label"></p>
@@ -511,34 +593,23 @@
     <!-- EKRAN 5: Weryfikacja -->
     <div id="screen-result" class="screen">
       <p style="color:#888; font-size:13px; margin-bottom:4px;">Porównaj swoją odpowiedź:</p>
-
       <div class="result-box">
         <p class="label">Twoja odpowiedź:</p>
         <p class="value" id="user-answer-display"></p>
         <p class="label">Poprawna odpowiedź:</p>
         <p class="value" id="correct-answer-display"></p>
       </div>
-
-      <!-- Zdanie przykładowe — pokazuje się tylko gdy istnieje -->
       <div class="example-box" id="example-box" style="display:none;">
         <div class="example-label">📖 Przykład użycia</div>
         <div class="example-eng" id="example-eng"></div>
         <div class="example-pl" id="example-pl"></div>
       </div>
-
       <div class="srs-buttons">
-        <button class="srs-btn btn-again" onclick="submitReview(10 / 1440)">
-          😰 Nie wiem<br><small>za 10 minut</small>
-        </button>
-        <button class="srs-btn btn-hard" onclick="submitReview(1)">
-          😓 Trudne<br><small>za 1 dzień</small>
-        </button>
-        <button class="srs-btn btn-good" onclick="submitReview(3)">
-          🙂 Dobre<br><small>za 3 dni</small>
-        </button>
-        <button class="srs-btn btn-easy" onclick="submitReview(7)">
-          😄 Łatwe<br><small>za 7 dni</small>
-        </button>
+        <button class="srs-btn btn-again" onclick="submitReview(10 / 1440)">😰 Nie wiem<br><small>za 10
+            minut</small></button>
+        <button class="srs-btn btn-hard" onclick="submitReview(1)">😓 Trudne<br><small>za 1 dzień</small></button>
+        <button class="srs-btn btn-good" onclick="submitReview(3)">🙂 Dobre<br><small>za 3 dni</small></button>
+        <button class="srs-btn btn-easy" onclick="submitReview(7)">😄 Łatwe<br><small>za 7 dni</small></button>
       </div>
     </div>
 
@@ -600,22 +671,30 @@
       level: null,
       category: null,
       direction: null,
-      currentWord: null,
+      currentWord: null,      // { id, english, polish, example_eng, example_pl }
       userAnswer: "",
       reviewedToday: 0,
-      isSOS: false,        // czy jesteśmy w trybie SOS
-      sosQueue: []         // kolejka słówek SOS (tylko id)
+      isSOS: false,
+      sosQueue: [],
+      // 🔐 Dane sesji zalogowanego użytkownika
+      accessToken: null,      // JWT token z Supabase Auth
+      userId: null,           // UUID użytkownika
+      userEmail: null
     };
 
     // =============================
-    // Helper: zapytanie do Supabase
+    // Helper: zapytanie do Supabase REST API
+    // Używa accessToken użytkownika (nie tylko anon key)
+    // żeby RLS wiedział KTO wysyła zapytanie
     // =============================
     async function supabase(path, options = {}) {
       const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
         ...options,
         headers: {
           "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`,
+          // Kluczowa różnica: używamy tokenu użytkownika, nie anon key,
+          // dzięki temu auth.uid() w politykach RLS rozpoznaje użytkownika
+          "Authorization": `Bearer ${state.accessToken || SUPABASE_KEY}`,
           "Content-Type": "application/json",
           ...(options.headers || {})
         }
@@ -625,25 +704,165 @@
     }
 
     // =============================
-    // Sprawdzamy ile błędów dziś
-    // i aktualizujemy przycisk SOS
+    // Helper: zapytanie do Supabase Auth API
+    // =============================
+    async function supabaseAuth(path, body) {
+      const response = await fetch(`${SUPABASE_URL}/auth/v1/${path}`, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+      const data = await response.json();
+      return { ok: response.ok, data };
+    }
+
+    // =============================
+    // REJESTRACJA
+    // =============================
+    async function handleRegister() {
+      const email = document.getElementById("register-email").value.trim();
+      const password = document.getElementById("register-password").value;
+      const errorBox = document.getElementById("register-error");
+      const loading = document.getElementById("register-loading");
+
+      errorBox.style.display = "none";
+
+      if (!email || !password) {
+        errorBox.textContent = "Wypełnij wszystkie pola.";
+        errorBox.style.display = "block";
+        return;
+      }
+      if (password.length < 6) {
+        errorBox.textContent = "Hasło musi mieć minimum 6 znaków.";
+        errorBox.style.display = "block";
+        return;
+      }
+
+      loading.style.display = "block";
+      const { ok, data } = await supabaseAuth("signup", { email, password });
+      loading.style.display = "none";
+
+      if (!ok) {
+        errorBox.textContent = data.msg || data.error_description || "Błąd rejestracji.";
+        errorBox.style.display = "block";
+        return;
+      }
+
+      // Supabase od razu loguje po rejestracji (bo confirm email jest wyłączone)
+      if (data.access_token) {
+        loginSuccess(data);
+      } else {
+        // Na wszelki wypadek — gdyby trzeba było się zalogować osobno
+        showScreen("screen-login");
+      }
+    }
+
+    // =============================
+    // LOGOWANIE
+    // =============================
+    async function handleLogin() {
+      const email = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-password").value;
+      const errorBox = document.getElementById("login-error");
+      const loading = document.getElementById("login-loading");
+
+      errorBox.style.display = "none";
+
+      if (!email || !password) {
+        errorBox.textContent = "Wypełnij wszystkie pola.";
+        errorBox.style.display = "block";
+        return;
+      }
+
+      loading.style.display = "block";
+      // Endpoint logowania używa innego parametru w URL
+      const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+        method: "POST",
+        headers: { "apikey": SUPABASE_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await response.json();
+      loading.style.display = "none";
+
+      if (!response.ok) {
+        errorBox.textContent = "Nieprawidłowy e-mail lub hasło.";
+        errorBox.style.display = "block";
+        return;
+      }
+
+      loginSuccess(data);
+    }
+
+    // =============================
+    // Po udanym logowaniu/rejestracji
+    // =============================
+    function loginSuccess(data) {
+      state.accessToken = data.access_token;
+      state.userId = data.user.id;
+      state.userEmail = data.user.email;
+
+      // Zapisujemy sesję w localStorage żeby nie trzeba było logować się co odświeżenie
+      localStorage.setItem("flashcards_session", JSON.stringify({
+        access_token: data.access_token,
+        user_id: data.user.id,
+        user_email: data.user.email
+      }));
+
+      document.getElementById("user-email-display").textContent = state.userEmail;
+      showScreen("screen-level");
+      checkSOSCount();
+    }
+
+    // =============================
+    // WYLOGOWANIE
+    // =============================
+    function handleLogout() {
+      localStorage.removeItem("flashcards_session");
+      state.accessToken = null;
+      state.userId = null;
+      state.userEmail = null;
+      document.getElementById("login-email").value = "";
+      document.getElementById("login-password").value = "";
+      showScreen("screen-login");
+    }
+
+    // =============================
+    // Sprawdzamy czy jest zapisana sesja przy starcie
+    // =============================
+    function tryRestoreSession() {
+      const saved = localStorage.getItem("flashcards_session");
+      if (!saved) return false;
+
+      try {
+        const session = JSON.parse(saved);
+        state.accessToken = session.access_token;
+        state.userId = session.user_id;
+        state.userEmail = session.user_email;
+        document.getElementById("user-email-display").textContent = state.userEmail;
+        showScreen("screen-level");
+        checkSOSCount();
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    // =============================
+    // Sprawdzamy ile błędów dziś (SOS)
     // =============================
     async function checkSOSCount() {
       const today = new Date().toISOString().split("T")[0];
-      // Pobieramy słówka z sos_date = dziś
-      const words = await supabase(`words?select=id&sos_date=eq.${today}`);
-      const count = words ? words.length : 0;
+      const progress = await supabase(
+        `user_progress?select=id&user_id=eq.${state.userId}&sos_date=eq.${today}`
+      );
+      const count = progress ? progress.length : 0;
 
       const btn = document.getElementById("sos-main-btn");
-      const countEl = document.getElementById("sos-count");
-
-      if (count > 0) {
-        // Pokazujemy przycisk SOS z liczbą błędów
-        countEl.textContent = count;
-        btn.style.display = "block";
-      } else {
-        btn.style.display = "none";
-      }
+      document.getElementById("sos-count").textContent = count;
+      btn.style.display = count > 0 ? "block" : "none";
     }
 
     // =============================
@@ -651,16 +870,26 @@
     // =============================
     async function startSOS() {
       const today = new Date().toISOString().split("T")[0];
-      const words = await supabase(
-        `words?select=id,english,polish,example_eng,example_pl&sos_date=eq.${today}`
+
+      // Pobieramy wpisy user_progress z dzisiejszym sos_date,
+      // razem z danymi słówka (JOIN przez Supabase select syntax)
+      const progress = await supabase(
+        `user_progress?select=id,word_id,words(id,english,polish,example_eng,example_pl)` +
+        `&user_id=eq.${state.userId}&sos_date=eq.${today}`
       );
 
-      if (!words || words.length === 0) return;
+      if (!progress || progress.length === 0) return;
 
-      // Zapisujemy kolejkę SOS w stanie
       state.isSOS = true;
-      state.sosQueue = [...words]; // kopia tablicy
-      state.direction = "en-pl";  // domyślny kierunek w SOS
+      // Przerabiamy strukturę żeby pasowała do reszty kodu
+      state.sosQueue = progress.map(p => ({
+        id: p.words.id,
+        english: p.words.english,
+        polish: p.words.polish,
+        example_eng: p.words.example_eng,
+        example_pl: p.words.example_pl
+      }));
+      state.direction = "en-pl";
 
       document.getElementById("direction-label").textContent = "🆘 Tryb S.O.S.";
       document.getElementById("sos-banner").style.display = "block";
@@ -669,29 +898,20 @@
       showScreen("screen-question");
     }
 
-    // =============================
-    // Ładujemy słowo z kolejki SOS
-    // =============================
     function loadSOSWord() {
       showScreen("screen-question");
 
       if (state.sosQueue.length === 0) {
-        // Kolejka SOS wyczerpana
         document.getElementById("empty-box").style.display = "block";
-        document.getElementById("empty-msg-text").textContent =
-          "Brawo! Powtórzyłeś wszystkie dzisiejsze błędy! 🎉";
+        document.getElementById("empty-msg-text").textContent = "Brawo! Powtórzyłeś wszystkie dzisiejsze błędy! 🎉";
         document.getElementById("question-word").style.display = "none";
         document.getElementById("answer-input").style.display = "none";
         document.querySelector(".check-btn").style.display = "none";
         return;
       }
 
-      // Bierzemy pierwsze słowo z kolejki
       state.currentWord = state.sosQueue[0];
-
-      const questionWord = state.direction === "en-pl"
-        ? state.currentWord.english
-        : state.currentWord.polish;
+      const questionWord = state.direction === "en-pl" ? state.currentWord.english : state.currentWord.polish;
 
       document.getElementById("question-word").textContent = questionWord;
       document.getElementById("question-word").style.display = "block";
@@ -718,10 +938,7 @@
 
       const allBtn = document.createElement("button");
       allBtn.className = "choice-btn";
-      allBtn.innerHTML = `
-      <div class="btn-title">📋 Wszystkie kategorie</div>
-      <div class="btn-sub">Ucz się wszystkich słówek z poziomu ${level}</div>
-    `;
+      allBtn.innerHTML = `<div class="btn-title">📋 Wszystkie kategorie</div><div class="btn-sub">Ucz się wszystkich słówek z poziomu ${level}</div>`;
       allBtn.onclick = () => selectCategory("all");
       list.appendChild(allBtn);
 
@@ -729,10 +946,7 @@
         const label = CATEGORY_LABELS[cat] || { pl: cat, sub: "" };
         const btn = document.createElement("button");
         btn.className = "choice-btn";
-        btn.innerHTML = `
-        <div class="btn-title">${label.pl}</div>
-        <div class="btn-sub">${label.sub}</div>
-      `;
+        btn.innerHTML = `<div class="btn-title">${label.pl}</div><div class="btn-sub">${label.sub}</div>`;
         btn.onclick = () => selectCategory(cat);
         list.appendChild(btn);
       });
@@ -746,9 +960,7 @@
     function selectCategory(category) {
       state.category = category;
       document.getElementById("dir-level-badge").textContent = state.level;
-      const catLabel = category === "all"
-        ? "Wszystkie"
-        : (CATEGORY_LABELS[category]?.pl || category);
+      const catLabel = category === "all" ? "Wszystkie" : (CATEGORY_LABELS[category]?.pl || category);
       document.getElementById("dir-category-badge").textContent = catLabel;
       showScreen("screen-direction");
     }
@@ -761,55 +973,77 @@
       state.reviewedToday = 0;
       state.isSOS = false;
       document.getElementById("sos-banner").style.display = "none";
-      const label = direction === "en-pl"
-        ? "🇬🇧 Angielski → Polski"
-        : "🇵🇱 Polski → Angielski";
+      const label = direction === "en-pl" ? "🇬🇧 Angielski → Polski" : "🇵🇱 Polski → Angielski";
       document.getElementById("direction-label").textContent = label;
       await loadNextWord();
     }
 
     // =============================
     // Pobieramy słowo do powtórki
+    // Strategia: pobieramy słówka z poziomu/kategorii RAZEM z user_progress
+    // (LEFT JOIN przez Supabase) i filtrujemy w JavaScript,
+    // bo musimy uwzględnić też słówka BEZ wpisu w user_progress (nowe, nieprzerobione)
     // =============================
     async function loadNextWord() {
-      const now = new Date().toISOString();
-
-      let url = `words?select=id,english,polish,example_eng,example_pl`
-        + `&level=eq.${state.level}`
-        + `&next_review_at=lte.${now}`
-        + `&order=next_review_at.asc`
-        + `&limit=1`;
+      let url = `words?select=id,english,polish,example_eng,example_pl,` +
+        `user_progress(next_review_at,sos_date)` +
+        `&level=eq.${state.level}` +
+        // Filtrujemy user_progress tylko dla naszego usera (inaczej zobaczylibyśmy cudze wiersze)
+        `&user_progress.user_id=eq.${state.userId}`;
 
       if (state.category !== "all") {
         url += `&category=eq.${state.category}`;
       }
 
-      const words = await supabase(url);
+      const allWords = await supabase(url);
       showScreen("screen-question");
 
-      if (!words || words.length === 0) {
-        document.getElementById("empty-box").style.display = "block";
-        document.getElementById("empty-msg-text").textContent =
-          "Brak słówek do powtórki!";
-        document.getElementById("question-word").style.display = "none";
-        document.getElementById("answer-input").style.display = "none";
-        document.querySelector(".check-btn").style.display = "none";
+      if (!allWords || allWords.length === 0) {
+        showEmptyState("Brak słówek w tej kategorii!");
         return;
       }
+
+      const now = new Date();
+
+      // Filtrujemy słówka gotowe do powtórki:
+      // - brak wpisu w user_progress (nowe słówko) → gotowe od razu
+      // - next_review_at <= teraz → gotowe do powtórki
+      const dueWords = allWords.filter(w => {
+        if (!w.user_progress || w.user_progress.length === 0) return true;
+        return new Date(w.user_progress[0].next_review_at) <= now;
+      });
+
+      if (dueWords.length === 0) {
+        showEmptyState("Brak słówek do powtórki!");
+        return;
+      }
+
+      // Sortujemy: najpierw te bez postępu (nowe), potem najstarsze next_review_at
+      dueWords.sort((a, b) => {
+        const aDate = a.user_progress?.[0]?.next_review_at || "2000-01-01";
+        const bDate = b.user_progress?.[0]?.next_review_at || "2000-01-01";
+        return new Date(aDate) - new Date(bDate);
+      });
+
+      state.currentWord = dueWords[0];
 
       document.getElementById("empty-box").style.display = "none";
       document.getElementById("question-word").style.display = "block";
       document.getElementById("answer-input").style.display = "block";
       document.querySelector(".check-btn").style.display = "block";
 
-      state.currentWord = words[0];
-      const questionWord = state.direction === "en-pl"
-        ? state.currentWord.english
-        : state.currentWord.polish;
-
+      const questionWord = state.direction === "en-pl" ? state.currentWord.english : state.currentWord.polish;
       document.getElementById("question-word").textContent = questionWord;
       document.getElementById("answer-input").value = "";
       document.getElementById("answer-input").focus();
+    }
+
+    function showEmptyState(message) {
+      document.getElementById("empty-box").style.display = "block";
+      document.getElementById("empty-msg-text").textContent = message;
+      document.getElementById("question-word").style.display = "none";
+      document.getElementById("answer-input").style.display = "none";
+      document.querySelector(".check-btn").style.display = "none";
     }
 
     // =============================
@@ -817,22 +1051,15 @@
     // =============================
     function checkAnswer() {
       state.userAnswer = document.getElementById("answer-input").value.trim();
+      const correctAnswer = state.direction === "en-pl" ? state.currentWord.polish : state.currentWord.english;
 
-      const correctAnswer = state.direction === "en-pl"
-        ? state.currentWord.polish
-        : state.currentWord.english;
-
-      document.getElementById("user-answer-display").textContent =
-        state.userAnswer || "(brak odpowiedzi)";
+      document.getElementById("user-answer-display").textContent = state.userAnswer || "(brak odpowiedzi)";
       document.getElementById("correct-answer-display").textContent = correctAnswer;
 
-      // Pokazujemy zdanie przykładowe jeśli istnieje
       const exampleBox = document.getElementById("example-box");
       if (state.currentWord.example_eng && state.currentWord.example_pl) {
-        document.getElementById("example-eng").textContent =
-          state.currentWord.example_eng;
-        document.getElementById("example-pl").textContent =
-          state.currentWord.example_pl;
+        document.getElementById("example-eng").textContent = state.currentWord.example_eng;
+        document.getElementById("example-pl").textContent = state.currentWord.example_pl;
         exampleBox.style.display = "block";
       } else {
         exampleBox.style.display = "none";
@@ -843,47 +1070,44 @@
 
     // =============================
     // EKRAN 5 → 4: Zapisujemy ocenę SRS
+    // Teraz zapisujemy do user_progress, nie do words!
+    // Używamy UPSERT — wstaw nowy wiersz albo zaktualizuj istniejący
     // =============================
     async function submitReview(intervalDays) {
       const today = new Date().toISOString().split("T")[0];
       const nextReview = new Date();
       nextReview.setTime(nextReview.getTime() + intervalDays * 24 * 60 * 60 * 1000);
 
-      // Budujemy obiekt aktualizacji
-      const updateData = {
+      const progressData = {
+        user_id: state.userId,
+        word_id: state.currentWord.id,
         next_review_at: nextReview.toISOString(),
-        interval_days: Math.round(intervalDays)
+        interval_days: Math.round(intervalDays),
+        sos_date: intervalDays < 0.1 ? today : null
       };
 
-      // Jeśli kliknięto "Nie wiem" (intervalDays = 10/1440 czyli ~0.007)
-      // zapisujemy dzisiejszą datę w sos_date
-      if (intervalDays < 0.1) {
-        updateData.sos_date = today;
-      }
-
-      // Aktualizujemy słowo w bazie
-      await supabase(`words?id=eq.${state.currentWord.id}`, {
-        method: "PATCH",
-        body: JSON.stringify(updateData)
+      // UPSERT: jeśli (user_id, word_id) już istnieje — aktualizujemy, inaczej wstawiamy nowy wiersz
+      await supabase(`user_progress`, {
+        method: "POST",
+        headers: { "Prefer": "resolution=merge-duplicates" },
+        body: JSON.stringify(progressData)
       });
 
-      // Zapisujemy sesję nauki
+      // Zapisujemy sesję nauki (też per użytkownik teraz)
       state.reviewedToday++;
       await supabase(`study_sessions`, {
         method: "POST",
         headers: { "Prefer": "resolution=merge-duplicates" },
         body: JSON.stringify({
+          user_id: state.userId,
           studied_at: today,
           words_reviewed: state.reviewedToday
         })
       });
 
-      // Aktualizujemy licznik SOS na ekranie głównym (w tle)
       checkSOSCount();
 
-      // Przechodzimy do następnego słowa
       if (state.isSOS) {
-        // W trybie SOS — usuwamy słowo z kolejki i ładujemy następne
         state.sosQueue.shift();
         loadSOSWord();
       } else {
@@ -899,12 +1123,13 @@
       document.getElementById("stats-loading").style.display = "block";
       document.getElementById("stats-content").style.display = "none";
 
-      const now = new Date().toISOString();
-      const today = new Date().toISOString().split("T")[0];
+      const now = new Date();
+      const today = now.toISOString().split("T")[0];
 
+      // Pobieramy WSZYSTKIE słówka + nasz postęp do nich (LEFT JOIN)
       const [allWords, sessions] = await Promise.all([
-        supabase(`words?select=id,level,interval_days,next_review_at`),
-        supabase(`study_sessions?select=studied_at,words_reviewed&order=studied_at.desc&limit=365`)
+        supabase(`words?select=id,level,user_progress(next_review_at,interval_days)&user_progress.user_id=eq.${state.userId}`),
+        supabase(`study_sessions?select=studied_at,words_reviewed&user_id=eq.${state.userId}&order=studied_at.desc&limit=365`)
       ]);
 
       // Streak
@@ -925,8 +1150,11 @@
       }
 
       const total = allWords ? allWords.length : 0;
-      const learned = allWords ? allWords.filter(w => w.interval_days > 0).length : 0;
-      const due = allWords ? allWords.filter(w => new Date(w.next_review_at) <= new Date(now)).length : 0;
+      const learned = allWords ? allWords.filter(w => w.user_progress?.[0]?.interval_days > 0).length : 0;
+      const due = allWords ? allWords.filter(w => {
+        if (!w.user_progress || w.user_progress.length === 0) return true;
+        return new Date(w.user_progress[0].next_review_at) <= now;
+      }).length : 0;
       const todaySession = sessions ? sessions.find(s => s.studied_at === today) : null;
       const todayCount = todaySession ? todaySession.words_reviewed : 0;
 
@@ -942,19 +1170,13 @@
       levels.forEach(lvl => {
         const lvlWords = allWords ? allWords.filter(w => w.level === lvl) : [];
         if (lvlWords.length === 0) return;
-        const lvlLearned = lvlWords.filter(w => w.interval_days > 0).length;
+        const lvlLearned = lvlWords.filter(w => w.user_progress?.[0]?.interval_days > 0).length;
         const pct = Math.round((lvlLearned / lvlWords.length) * 100);
         levelList.innerHTML += `
         <div class="level-progress">
-          <div class="level-header">
-            <span><strong>${lvl}</strong> — ${lvlLearned} / ${lvlWords.length} słówek</span>
-            <span>${pct}%</span>
-          </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" style="width: ${pct}%"></div>
-          </div>
-        </div>
-      `;
+          <div class="level-header"><span><strong>${lvl}</strong> — ${lvlLearned} / ${lvlWords.length} słówek</span><span>${pct}%</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${pct}%"></div></div>
+        </div>`;
       });
 
       document.getElementById("stats-loading").style.display = "none";
@@ -969,16 +1191,22 @@
       document.getElementById(screenId).classList.add("active");
     }
 
-    // Enter = Sprawdź
     document.getElementById("answer-input").addEventListener("keydown", e => {
       if (e.key === "Enter") checkAnswer();
     });
 
-    // Sprawdzamy SOS przy starcie aplikacji
-    checkSOSCount();
-  </script>
-  <script>
-    // Rejestrujemy service worker — działa tylko na HTTPS
+    // Enter w formularzach logowania
+    document.getElementById("login-password").addEventListener("keydown", e => {
+      if (e.key === "Enter") handleLogin();
+    });
+    document.getElementById("register-password").addEventListener("keydown", e => {
+      if (e.key === "Enter") handleRegister();
+    });
+
+    // Przy starcie — próbujemy odtworzyć zapisaną sesję, inaczej pokazujemy login
+    tryRestoreSession();
+
+    // Rejestrujemy service worker
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/service-worker.js")
         .then(() => console.log("Service Worker zarejestrowany"))
